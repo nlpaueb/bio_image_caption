@@ -1,12 +1,12 @@
  
-Datasets
+#Datasets
 
 First, to obtain the Peir Gross and IU X-ray datasets run the get_iu_xray.py and get_peir_gross.py. The datasets will be downloaded in the corresponding folder 
 and split to train and test sets in the form of tsv files.
 To obtain the ImageCLEF dataset follow the instructions described here, in the Participant registration section. 
 After downloading the dataset you can run the imageCLEF_dataset.py to split the provided training data to train and test.
 
-Baselines
+#Baselines
 
 main.py performs the preprocessing, runs the frequency and the 1NN baselines and computes the wmd.
 Also the json files of the results and the test sets are created in the desired mscoco format to be later used for the mscoco evaluation.
@@ -18,9 +18,9 @@ You also need to download the pretrained embeddings and unzip them in the sivl_c
 
 When main script finishes the resulted tsv and json files will be in each dataset folder.
 
-Mscoco evaluation
+# Εvaluation
 
-The mscoco evaluation code is in the coco_caption folder. To run the code you need to create a new environment with the following requirements:
+The mscoco evaluation code was used and is in the coco_caption folder. To run the code you need to create a new environment with the following requirements:
 - java 1.8.0
 - python 2.7
 
