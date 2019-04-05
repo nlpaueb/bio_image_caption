@@ -20,7 +20,7 @@ When main script finishes the resulted tsv and json files will be in each datase
 
 # Εvaluation
 
-The mscoco evaluation code was used and is in the coco_caption folder. To run the code you need to create a new environment with the following requirements:
+The mscoco evaluation code used is in the coco_caption folder. To run the code you need to create a new environment with the following requirements:
 - java 1.8.0
 - python 2.7
 
