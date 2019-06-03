@@ -11,8 +11,8 @@ import pickle
 import numpy as np
 import os
 
-def most_similar(filepath, images_path):
-	img2vec = Img2Vec(cuda=True)
+def most_similar(filepath, images_path, cuda):
+	img2vec = Img2Vec(cuda=cuda)
 
 	train_path = os.path.join(filepath, "train_images.tsv")
 	test_path = os.path.join(filepath, "test_images.tsv")
