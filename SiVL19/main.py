@@ -32,13 +32,15 @@ def main():
 	# print("Frequency baseline for ImageCLEF:")
 	# freq.most_frequent(IMAGE_CLEF_PATH, imageCLEF_length)
 
+	# if set to true choose GPU to run the 1NN baseline
+	cuda = True
 	#run the onenn baseline for each dataset
 	print("1NN baseline for Peir Gross:")
-	onenn.most_similar(PEIR_GROSS_PATH, PEIR_GROSS_IMAGES_PATH)
+	onenn.most_similar(PEIR_GROSS_PATH, PEIR_GROSS_IMAGES_PATH, cuda)
 	print("1NN baseline for IU X-ray:")
-	onenn.most_similar(IU_XRAY_PATH, IU_XRAY_IMAGES_PATH)
+	onenn.most_similar(IU_XRAY_PATH, IU_XRAY_IMAGES_PATH, cuda)
 	# print("1NN baseline for ImageCLEF:")
-	# onenn.most_similar(IMAGE_CLEF_PATH, IMAGE_CLEF_IMAGES_PATH)
+	# onenn.most_similar(IMAGE_CLEF_PATH, IMAGE_CLEF_IMAGES_PATH, cuda)
 
 	#define pretrained embeddings path
 	embeddings_path = "pubmed2018_w2v_200D/pubmed2018_w2v_200D.bin"
