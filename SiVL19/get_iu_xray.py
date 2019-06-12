@@ -98,7 +98,6 @@ print("Found", len(reports_with_no_findings), "reports with no Findings section"
 
 print("Collected", len(images_captions), "image-caption pairs")
 
-print(list(images_captions.keys())[0])
 with open("iu_xray/iu_xray.tsv", "w") as output_file:
 	for image_caption in images_captions:
 		output_file.write(image_caption + "\t" + images_captions[image_caption])
