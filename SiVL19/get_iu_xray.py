@@ -92,8 +92,8 @@ for report in reports:
             major_tags = []
             auto_tags = []
             if tags is not None:
-                major_tags = tags.findall("major")
-                auto_tags = tags.findall("automatic")
+                major_tags = [t.text for t in tags.findall("major")]
+                auto_tags = [t.text for t in tags.findall("automatic")]
 
             for image in images:
                 iid = image.get("id") + ".png"
@@ -120,8 +120,10 @@ with open("iu_xray/iu_xray.tsv", "w") as output_file:
 # Safer JSON storing
 with open("iu_xray/iu_xray_captions.json", "w") as output_file:
     output_file.write(json.dumps(images_captions))
-with open("iu_xray/iu_xray_tags.json", "w") as output_file:
+with open("iu_xray/iu_xray_major_tags.json", "w") as output_file:
     output_file.write(json.dumps(images_major_tags))
+with open("iu_xray/iu_xray_auto_tags.json", "w") as output_file:
+    output_file.write(json.dumps(images_auto_tags))
 
 # perform a case based split
 random.seed(42)
