@@ -56,54 +56,52 @@ reports_with_images = {}
 text_of_reports = {}
 
 for report in reports:
+    tree = ET.parse(os.path.join(reports_path, report))
+    root = tree.getroot()
+    img_ids = []
+    # find the images of the report
+    images = root.findall("parentImage")
+    # if there aren't any ignore the report
+    if len(images) == 0:
+        reports_with_no_image.append(report)
+    else:
+        sections = root.find("MedlineCitation").find("Article").find("Abstract").findall("AbstractText")
+        # find impression and findings sections
+        for section in sections:
+            if section.get("Label") == "FINDINGS":
+                findings = section.text
+            if section.get("Label") == "IMPRESSION":
+                impression = section.text
 
-	tree = ET.parse(os.path.join(reports_path, report))
-	root = tree.getroot()
-	img_ids = [] 
-	# find the images of the report
-	images = root.findall("parentImage")
-	# if there aren't any ignore the report
-	if len(images) == 0:
-		reports_with_no_image.append(report)
-	else:
+        if impression is None and findings is None:
+            reports_with_empty_sections.append(report)
+        else:
+            if impression is None:
+                reports_with_no_impression.append(report)
+                caption = findings
+            elif findings is None:
+                reports_with_no_findings.append(report)
+                caption = impression
+            else:
+                caption = impression + " " + findings
 
-		sections = root.find("MedlineCitation").find("Article").find("Abstract").findall("AbstractText")
-		# find impression and findings sections
-		for section in sections:
-			if section.get("Label") == "FINDINGS":
-				findings = section.text
-			if section.get("Label") == "IMPRESSION":
-				impression = section.text
+            # get the MESH tags
+            tags = root.find("MESH")
+            major_tags = []
+            auto_tags = []
+            if tags is not None:
+                major_tags = tags.findall("major")
+                auto_tags = tags.finall("automatic")
 
-		if impression is None and findings is None:
-			reports_with_empty_sections.append(report)
-		else:
-			if impression is None:
-				reports_with_no_impression.append(report)
-				caption = findings
-			elif findings is None:
-				reports_with_no_findings.append(report)
-				caption = impression
-			else:
-				caption = impression + " " + findings
+            for image in images:
+                iid = image.get("id") + ".png"
+                images_captions[iid] = caption
+                img_ids.append(iid)
+                images_major_tags[iid] = major_tags
+                images_auto_tags[iid] = auto_tags
 
-			# get the MESH tags
-			tags = root.find("MESH")
-			major_tags = []
-			auto_tags = []
-			if tags is not None:
-				major_tags = tags.findall("major")
-				auto_tags = tags.finall("automatic")
-
-			for image in images:
-				iid = image.get("id") + ".png"
-				images_captions[iid] = caption
-				img_ids.append(iid)
-				images_major_tags[iid] = major_tags
-				images_auto_tags[iid] = auto_tags
-
-			reports_with_images[report] = img_ids
-			text_of_reports[report] = caption
+            reports_with_images[report] = img_ids
+            text_of_reports[report] = caption
 
 
 print("Found", len(reports_with_no_image), "reports with no associated image")
@@ -114,15 +112,15 @@ print("Found", len(reports_with_no_findings), "reports with no Findings section"
 print("Collected", len(images_captions), "image-caption pairs")
 
 with open("iu_xray/iu_xray.tsv", "w") as output_file:
-	for image_caption in images_captions:
-		output_file.write(image_caption + "\t" + images_captions[image_caption])
-		output_file.write("\n")
+    for image_caption in images_captions:
+        output_file.write(image_caption + "\t" + images_captions[image_caption])
+        output_file.write("\n")
 
 # Safer JSON storing
 with open("iu_xray/iu_xray_captions.json", "w") as output_file:
-	output_file.write(images_captions)
+    output_file.write(json.dumps(images_captions))
 with open("iu_xray/iu_xray_tags.json", "w") as output_file:
-	output_file.write(images_major_tags)
+    output_file.write(json.dumps(images_major_tags))
 
 
 # perform a case based split
