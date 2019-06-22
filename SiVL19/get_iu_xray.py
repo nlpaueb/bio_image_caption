@@ -3,6 +3,7 @@ from shutil import rmtree
 import xml.etree.ElementTree as ET
 import random
 import numpy
+import json
 
 def split_cases(reports_images, reports_text, keys, filename):
 	new_images = {}
@@ -49,6 +50,8 @@ reports_with_no_impression = []
 reports_with_no_findings = []
 
 images_captions = {}
+images_major_tags = {}
+images_auto_tags = {}
 reports_with_images = {}
 text_of_reports = {}
 
@@ -63,6 +66,7 @@ for report in reports:
 	if len(images) == 0:
 		reports_with_no_image.append(report)
 	else:
+
 		sections = root.find("MedlineCitation").find("Article").find("Abstract").findall("AbstractText")
 		# find impression and findings sections
 		for section in sections:
@@ -83,9 +87,17 @@ for report in reports:
 			else:
 				caption = impression + " " + findings
 
+			# get the MESH tags
+			tags = root.find("MESH")
+			major_tags = tags.findall("major")
+			auto_tags = tags.finall("automatic")
+
 			for image in images:
-				images_captions[image.get("id") + ".png"] = caption
-				img_ids.append(image.get("id") + ".png")
+				iid = image.get("id") + ".png"
+				images_captions[iid] = caption
+				img_ids.append(iid)
+				images_major_tags[iid] = major_tags
+				images_auto_tags[iid] = auto_tags
 
 			reports_with_images[report] = img_ids
 			text_of_reports[report] = caption
@@ -102,6 +114,13 @@ with open("iu_xray/iu_xray.tsv", "w") as output_file:
 	for image_caption in images_captions:
 		output_file.write(image_caption + "\t" + images_captions[image_caption])
 		output_file.write("\n")
+
+# Safer JSON storing
+with open("iu_xray/iu_xray_captions.json", "w") as output_file:
+	output_file.write(images_captions)
+with open("iu_xray/iu_xray_tags.json", "w") as output_file:
+	output_file.write(images_major_tags)
+
 
 # perform a case based split
 random.seed(42)
