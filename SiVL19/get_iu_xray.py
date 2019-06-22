@@ -91,7 +91,7 @@ for report in reports:
 			tags = root.find("MESH")
 			major_tags = []
 			auto_tags = []
-			if len(tags)>0:
+			if tags is not None:
 				major_tags = tags.findall("major")
 				auto_tags = tags.finall("automatic")
 
