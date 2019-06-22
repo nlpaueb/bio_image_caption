@@ -93,7 +93,7 @@ for report in reports:
             auto_tags = []
             if tags is not None:
                 major_tags = tags.findall("major")
-                auto_tags = tags.finall("automatic")
+                auto_tags = tags.findall("automatic")
 
             for image in images:
                 iid = image.get("id") + ".png"
