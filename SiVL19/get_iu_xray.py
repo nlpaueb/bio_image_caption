@@ -88,22 +88,22 @@ for report in reports:
 				caption = impression + " " + findings
 
 			# get the MESH tags
-            tags = root.find("MESH")
-            major_tags = []
-            auto_tags = []
-            if len(tags)>0:
-                major_tags = tags.findall("major")
-                auto_tags = tags.finall("automatic")
+			tags = root.find("MESH")
+			major_tags = []
+			auto_tags = []
+			if len(tags)>0:
+				major_tags = tags.findall("major")
+				auto_tags = tags.finall("automatic")
 
-            for image in images:
-                iid = image.get("id") + ".png"
-                images_captions[iid] = caption
-                img_ids.append(iid)
-                images_major_tags[iid] = major_tags
-                images_auto_tags[iid] = auto_tags
+			for image in images:
+				iid = image.get("id") + ".png"
+				images_captions[iid] = caption
+				img_ids.append(iid)
+				images_major_tags[iid] = major_tags
+				images_auto_tags[iid] = auto_tags
 
-            reports_with_images[report] = img_ids
-            text_of_reports[report] = caption
+			reports_with_images[report] = img_ids
+			text_of_reports[report] = caption
 
 
 print("Found", len(reports_with_no_image), "reports with no associated image")
