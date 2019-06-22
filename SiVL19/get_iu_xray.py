@@ -5,23 +5,25 @@ import random
 import numpy
 import json
 
+
 def split_cases(reports_images, reports_text, keys, filename):
-	new_images = {}
+    new_images = {}
 
-	for key in keys:
-		for image in reports_images[key]:
-			new_images[image] = reports_text[key]
+    for key in keys:
+        for image in reports_images[key]:
+            new_images[image] = reports_text[key]
 
-	with open(filename, "w") as output_file:
-		for new_image in new_images:
-			output_file.write(new_image + "\t" + new_images[new_image])
-			output_file.write("\n")
+    with open(filename, "w") as output_file:
+        for new_image in new_images:
+            output_file.write(new_image + "\t" + new_images[new_image])
+            output_file.write("\n")
+
 
 # create dataset folder
 try:
-	rmtree("iu_xray/")
+    rmtree("iu_xray/")
 except BaseException:
-	pass
+    pass
 os.makedirs("iu_xray/")
 
 # download PNG images
@@ -86,7 +88,7 @@ for report in reports:
                 caption = impression + " " + findings
 
             # get the MESH tags
-            tags = root.find("MESH")
+            tags = root.find("MeSH")
             major_tags = []
             auto_tags = []
             if tags is not None:
@@ -102,7 +104,6 @@ for report in reports:
 
             reports_with_images[report] = img_ids
             text_of_reports[report] = caption
-
 
 print("Found", len(reports_with_no_image), "reports with no associated image")
 print("Found", len(reports_with_empty_sections), "reports with empty Impression and Findings sections")
@@ -121,7 +122,6 @@ with open("iu_xray/iu_xray_captions.json", "w") as output_file:
     output_file.write(json.dumps(images_captions))
 with open("iu_xray/iu_xray_tags.json", "w") as output_file:
     output_file.write(json.dumps(images_major_tags))
-
 
 # perform a case based split
 random.seed(42)
