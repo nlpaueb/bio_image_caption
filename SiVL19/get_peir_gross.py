@@ -4,7 +4,7 @@ from shutil import rmtree
 from bs4 import BeautifulSoup
 import random
 import numpy
-
+import json
 
 def split_images(images, keys, filename):
 	new_images = {}
@@ -27,7 +27,8 @@ except BaseException:
 	pass
 os.makedirs("peir_gross/peir_gross_images/")
 
-images = {}
+image_captions = {}
+image_tags = {}
 
 # the main page of the pathology category that contains the collections of all the sub-categories
 main_page_url = "http://peir.path.uab.edu/library/index.php?/category/2"
@@ -86,9 +87,12 @@ for url in categories_urls:
 				filename = image.get("alt")
 				image_src = image.get("src")
 				description = image.get("title").replace("\r\n", " ")
+				image_captions[filename] = description
 
-				images[filename] = description
-				
+				tags_container = image_soup.find("div", {"id":"Tags"})
+				tags = [tag.string for tag in tags_container.findChildren("a")]
+				image_tags[filename] = tags
+
 				# save the image to images folder
 				with open( "peir_gross/peir_gross_images/" + filename, "wb") as f:
 					image_file = requests.get(base_url + "/" + image_src)
@@ -113,21 +117,28 @@ for url in categories_urls:
 
 
 with open("peir_gross/peir_gross.tsv", "w") as output_file:
-	for image in images:
-		output_file.write(image + "\t" + images[image])
+	for image in image_captions:
+		output_file.write(image + "\t" + image_captions[image])
 		output_file.write("\n")
 
-print("Wrote all", len(images),"image-caption pairs to tsv.")
+# JSON saving
+with open("peir_gross/peir_gross_captions.json", "w") as output_file:
+    output_file.write(json.dumps(image_captions))
+with open("peir_gross/peir_gross_tags.json", "w") as output_file:
+    output_file.write(json.dumps(image_tags))
+
+
+print("Wrote all", len(image_captions), "image-caption pairs to tsv.")
 
 # split to train and test
 random.seed(42)
-keys = list(images.keys())
+keys = list(image_captions.keys())
 random.shuffle(keys)
 
-train_split = int(numpy.floor(len(images) * 0.9))
+train_split = int(numpy.floor(len(image_captions) * 0.9))
 
 train_keys = keys[:train_split]
 test_keys = keys[train_split:]
 
-split_images(images, train_keys, "peir_gross/train_images.tsv")
-split_images(images, test_keys, "peir_gross/test_images.tsv")
+split_images(image_captions, train_keys, "peir_gross/train_images.tsv")
+split_images(image_captions, test_keys, "peir_gross/test_images.tsv")
