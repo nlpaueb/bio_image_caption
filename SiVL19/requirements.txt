@@ -1,4 +1,4 @@
-# Library dependencies for the dataset preprocessing and baselines code.
+# Library dependencies for the python code.
 # Install with 'pip install -r requirements.txt'
 beautifulsoup4==4.7.1
 boto==2.49.0
