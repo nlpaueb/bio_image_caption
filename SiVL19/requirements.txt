@@ -1,0 +1,30 @@
+# Library dependencies for the python code.
+# Install with 'pip install -r requirements.txt'
+beautifulsoup4==4.7.1
+boto==2.49.0
+boto3==1.9.207
+botocore==1.12.207
+certifi==2019.6.16
+chardet==3.0.4
+Cython==0.29.13
+docutils==0.14
+gensim==3.4.0
+idna==2.8
+jmespath==0.9.4
+numpy==1.15.4
+pandas==0.24.1
+Pillow==6.1.0
+pyemd==0.5.1
+python-dateutil==2.8.0
+pytz==2019.2
+requests==2.21.0
+s3transfer==0.2.1
+scikit-learn==0.20.2
+scipy==1.3.1
+six==1.12.0
+smart-open==1.8.4
+soupsieve==1.9.2
+torch==1.2.0
+torchvision==0.4.0
+tqdm==4.31.1
+urllib3==1.24.3
