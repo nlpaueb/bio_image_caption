@@ -1,68 +1,92 @@
 import gensim
 import re
-import os
+import argparse
+import pandas as pd
 
-def load_tsv(filename):
-	images = {}
 
-	with open(filename, "r") as file:
-		for line in file:
-			line = line.replace("\n", "").split("\t")
-			images[line[0]] = line[1]
+# Word Mover's Distance computes the minimum cumulative cost required to move all word embeddings of one caption
+# to aligned word embeddings of the other caption. We used Gensim's implementation of WMD (https://goo.gl/epzecP)
+# and biomedical word2vec embeddings (https://archive.org/details/pubmed2018_w2v_200D.tar).
+# WMD scores are also expressed as similarity values: WMS = (1 + WMD)^-1
 
-	return images
 
-def preprocess_data(pairs):
+parser = argparse.ArgumentParser(description="Takes as arguments a file with the gold captions, "
+                                             "a file with the generated ones and a file with pre-trained embeddings "
+                                             "and computes WMD and WMS scores")
+parser.add_argument("gold", help="Path to tsv file with gold captions")
+parser.add_argument("generated", help="Path to tsv file with generated captions")
+parser.add_argument("embeddings", help="Path to bin file with of pre-trained embeddings")
 
-	# clean for BioASQ
-	bioclean = lambda t: re.sub('[.,?;*!%^&_+():-\[\]{}]', '', t.replace('"', '').replace('/', '').replace('\\', '').replace("'",'').strip().lower()).split()
 
-	pr_pairs = {}
-	for pair in pairs:
-		tokens = bioclean(pairs[pair])
-		pr_pairs[pair] = " ".join(tokens)
+def preprocess_captions(images_captions):
+    """
 
-	return pr_pairs
+    :param images_captions: Dictionary with image ids as keys and captions as values
+    :return: Dictionary with the processed captions as values
+    """
+
+    # Clean for BioASQ
+    bioclean = lambda t: re.sub('[.,?;*!%^&_+():-\[\]{}]', '',
+                                t.replace('"', '').replace('/', '').replace('\\', '').replace("'",
+                                                                                              '').strip().lower())
+    pr_captions = {}
+    # Apply bio clean to data
+    for image in images_captions:
+        pr_captions[image] = bioclean(images_captions[image])
+
+    return pr_captions
 
 
 def compute_wmd(gts, res, bio_path):
+    """
 
-	bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
-	print("Loaded word embeddings")
+    :param gts: Dictionary with the image ids and their gold captions
+    :param res: Dictionary with the image ids ant their generated captions
+    :param bio_path: Path to the pre-trained biomedical word embeddings
+    :print: WMD and WMS scores
+    """
 
-	#calculate wmd for each gts-res captions pair
-	print("Calculating wmd for each pair...")
-	total_distance = 0
-	img_wmds,similarities = {},{}
+    # Preprocess captions
+    gts = preprocess_captions(gts)
+    res = preprocess_captions(res)
 
-	assert len(gts) == len(res)
+    # Load word embeddings
+    bio = gensim.models.KeyedVectors.load_word2vec_format(bio_path, binary=True)
+    print("Loaded word embeddings")
 
-	for image in gts:
-		distance = bio.wmdistance(gts[image].split(), res[image].split())
-		similarities[image] = (1./(1.+distance))
-		total_distance = total_distance + distance
-		img_wmds[image] = distance
+    # Calculate WMD for each gts-res captions pair
+    print("Calculating wmd for each pair...")
+    total_distance = 0
+    img_wmds, similarities = {}, {}
 
-	#calculate mean wmd
-	wmd = total_distance / float(len(gts))
-	wms = sum(similarities.values())/float(len(similarities))
+    assert len(gts) == len(res)
 
-	return wmd, wms
+    for image in gts:
+        distance = bio.wmdistance(gts[image].split(), res[image].split())
+        similarities[image] = (1. / (1. + distance))
+        total_distance = total_distance + distance
+        img_wmds[image] = distance
+
+    # calculate mean wmd
+    wmd = total_distance / float(len(gts))
+    wms = sum(similarities.values()) / float(len(similarities))
+
+    print("WMD =", wmd, ", WMS =", wms)
 
 
-def evaluate(filepath, bio_path):
+if __name__ == "__main__":
 
-	gts = load_tsv(os.path.join(filepath, "test_images.tsv"))
-	freq_results = load_tsv(os.path.join(filepath, "freq_results.tsv"))
-	onenn_results = load_tsv(os.path.join(filepath, "onenn_results.tsv"))
+    args = parser.parse_args()
+    gold_path = args.gold
+    results_path = args.generated
+    bio_embeddings_path = args.embeddings
 
-	pr_gts = preprocess_data(gts)
-	pr_onenn_results = preprocess_data(onenn_results)
+    # Load data
+    gts_data = pd.read_csv(gold_path, sep="\t", header=None, names=["image_ids", "captions"])
+    gts = dict(zip(gts_data.image_ids, gts_data.captions))
 
-	#evaluate frequency results
-	freq_wmd, freq_wms = compute_wmd(pr_gts, freq_results, bio_path)
-	print("For frequency baseline: wmd =", freq_wmd, ", wms =", freq_wms)
+    res_data = pd.read_csv(results_path, sep="\t", header=None, names=["image_ids", "captions"])
+    res = dict(zip(res_data.image_ids, res_data.captions))
 
-	#evaluate onenn results
-	onenn_wmd, onenn_wms = compute_wmd(pr_gts, pr_onenn_results, bio_path)
-	print("For 1NN baseline: wmd =", onenn_wmd, ", wms =", onenn_wms)
+    # Compute evaluation scores
+    compute_wmd(gts, res, bio_embeddings_path)
