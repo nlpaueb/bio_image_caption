@@ -28,3 +28,4 @@ torch==1.2.0
 torchvision==0.4.0
 tqdm==4.31.1
 urllib3==1.24.3
+img2vec_pytorch
