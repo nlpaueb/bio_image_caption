@@ -131,8 +131,8 @@ def parse_reports(reports_path):
 
                 for iid in img_ids:
                     images_captions[iid] = caption
-                    images_major_tags[iid] = major_tags
-                    images_auto_tags[iid] = auto_tags
+                    images_major_tags[iid] = manual_tags
+                    images_auto_tags[iid] = mti_tags
 
                 reports_with_images[report] = img_ids
                 text_of_reports[report] = caption
