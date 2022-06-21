@@ -11,7 +11,7 @@ docutils==0.14
 gensim==3.4.0
 idna==2.8
 jmespath==0.9.4
-numpy==1.15.4
+numpy==1.22.0
 pandas==0.24.1
 Pillow==6.1.0
 pyemd==0.5.1
